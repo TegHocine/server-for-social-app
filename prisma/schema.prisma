@@ -9,3 +9,54 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id         String     @id @default(uuid())
+  firtName   String
+  lastName   String
+  email      String     @unique
+  workAt     String?
+  inRelation Boolean    @default(false)
+  location   String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  Post       Post[]
+  Followed   Follower[] @relation("followedUser")
+  Following  Follower[] @relation("followingUser")
+  Reaction   Reaction[]
+  Comment    Comment[]
+}
+
+model Post {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [createdBy], references: [id])
+  createdBy String
+  media     String?
+  text      String
+  Reaction  Reaction[]
+}
+
+model Follower {
+  id              String @id @default(uuid())
+  followedUser    User   @relation("followedUser", fields: [followedUserId], references: [id])
+  followedUserId  String
+  followingUser   User   @relation("followingUser", fields: [followingUserId], references: [id])
+  followingUserId String
+}
+
+model Reaction {
+  id        String @id @default(uuid())
+  post      Post   @relation(fields: [reactedTo], references: [id])
+  reactedTo String
+  user      User   @relation(fields: [reactedBy], references: [id])
+  reactedBy String
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [commentedBy], references: [id])
+  commentedBy String
+  comment     String
+  createdAt   DateTime @default(now())
+}
